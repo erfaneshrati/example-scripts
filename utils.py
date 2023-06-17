@@ -246,8 +246,10 @@ def fast_score_by_date(df, columns, target, tb=None, era_col="era"):
 def exposure_dissimilarity_per_era(df, prediction_col, example_col, feature_cols=None):
     if feature_cols is None:
         feature_cols = [c for c in df.columns if c.startswith("feature")]
-    u = df.loc[:, feature_cols].corrwith(df[prediction_col])
-    e = df.loc[:, feature_cols].corrwith(df[example_col])
+    u = np.corrcoef(df.loc[:, feature_cols].to_numpy(), np.repeat(df[prediction_col].to_numpy()[:, np.newaxis], len(feature_cols), axis=1), rowvar=False)
+    u = u[np.arange(len(feature_cols)), len(feature_cols)+np.arange(len(feature_cols))]
+    e = np.corrcoef(df.loc[:, feature_cols].to_numpy(), np.repeat(df[example_col].to_numpy()[:, np.newaxis], len(feature_cols), axis=1), rowvar=False)
+    e = e[np.arange(len(feature_cols)), len(feature_cols)+np.arange(len(feature_cols))]
     return 1 - (np.dot(u, e) / np.dot(e, e))
 
 
